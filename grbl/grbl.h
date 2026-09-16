@@ -56,6 +56,7 @@
 #include "probe.h"
 #include "protocol.h"
 #include "report.h"
+#include "rotation_control.h"
 #include "serial.h"
 #include "spindle_control.h"
 #include "stepper.h"

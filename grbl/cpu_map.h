@@ -96,15 +96,23 @@
   #define PROBE_BIT       5  // Uno Analog Pin 5
   #define PROBE_MASK      (1<<PROBE_BIT)
 
+  #define ROT_STEP_DDR   DDRC
+  #define ROT_STEP_PORT  PORTC
+  #define ROT_STEP_BIT   3   // Uno Analog Pin 3
+
+  #define ROT_DIR_DDR    DDRC
+  #define ROT_DIR_PORT   PORTC
+  #define ROT_DIR_BIT    4   // Uno Analog Pin 4
+
   #if !defined(ENABLE_DUAL_AXIS)
 
-    // Define flood and mist coolant enable output pins.
-    #define COOLANT_FLOOD_DDR   DDRC
-    #define COOLANT_FLOOD_PORT  PORTC
-    #define COOLANT_FLOOD_BIT   3  // Uno Analog Pin 3
-    #define COOLANT_MIST_DDR   DDRC
-    #define COOLANT_MIST_PORT  PORTC
-    #define COOLANT_MIST_BIT   4  // Uno Analog Pin 4
+    // // Define flood and mist coolant enable output pins.
+    // #define COOLANT_FLOOD_DDR   DDRC
+    // #define COOLANT_FLOOD_PORT  PORTC
+    // #define COOLANT_FLOOD_BIT   3  // Uno Analog Pin 3
+    // #define COOLANT_MIST_DDR   DDRC
+    // #define COOLANT_MIST_PORT  PORTC
+    // #define COOLANT_MIST_BIT   4  // Uno Analog Pin 4
 
     // Define spindle enable and spindle direction output pins.
     #define SPINDLE_ENABLE_DDR    DDRB

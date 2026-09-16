@@ -53,7 +53,7 @@
 // ideal, just be careful with values that state 'do not alter' and check both report.c and gcode.c 
 // to see how they are used, if you need to alter them.
 
-// Modal Group G0: Non-modal actions
+// Modal Group G0: Non-modal actions (G0 is an internal label and does not refer to G0 MOTION_MODE_SEEK)
 #define NON_MODAL_NO_ACTION 0 // (Default: Must be zero)
 #define NON_MODAL_DWELL 4 // G4 (Do not alter value)
 #define NON_MODAL_SET_COORDINATE_DATA 10 // G10 (Do not alter value)
@@ -75,6 +75,7 @@
 #define MOTION_MODE_PROBE_AWAY 142 // G38.4 (Do not alter value)
 #define MOTION_MODE_PROBE_AWAY_NO_ERROR 143 // G38.5 (Do not alter value)
 #define MOTION_MODE_NONE 80 // G80 (Do not alter value)
+#define MOTION_MODE_AXLE_ROTATE 63 // G63 (Do not alter value)
 
 // Modal Group G2: Plane select
 #define PLANE_SELECT_XY 0 // G17 (Default: Must be zero)
@@ -149,6 +150,7 @@
 #define WORD_X  10
 #define WORD_Y  11
 #define WORD_Z  12
+#define WORD_A  13
 
 // Define g-code parser position updating flags
 #define GC_UPDATE_POS_TARGET   0 // Must be zero
@@ -207,6 +209,7 @@ typedef struct {
   float s;         // Spindle speed
   uint8_t t;       // Tool selection
   float xyz[3];    // X,Y,Z Translational axes
+  float a;         // A rotational axis
 } gc_values_t;
 
 

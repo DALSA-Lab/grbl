@@ -139,7 +139,6 @@ uint8_t gc_execute_line(char *line)
 
       /* 'G' and 'M' Command Words: Parse commands and check for modal group violations.
          NOTE: Modal group numbers are defined in Table 4 of NIST RS274-NGC v3, pg.20 */
-
       case 'G':
         // Determine 'G' command and its modal group
         switch(int_value) {
@@ -160,7 +159,7 @@ uint8_t gc_execute_line(char *line)
               mantissa = 0; // Set to zero to indicate valid non-integer G command.
             }                
             break;
-          case 0: case 1: case 2: case 3: case 38:
+          case 0: case 1: case 2: case 3: case 38: case 63:
             // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.
             // * G43.1 is also an axis command but is not explicitly defined this way.
             if (axis_command) { FAIL(STATUS_GCODE_AXIS_COMMAND_CONFLICT); } // [Axis word/command conflict]
@@ -240,7 +239,6 @@ uint8_t gc_execute_line(char *line)
         break;
 
       case 'M':
-
         // Determine 'M' command and its modal group
         if (mantissa > 0) { FAIL(STATUS_GCODE_COMMAND_VALUE_NOT_INTEGER); } // [No Mxx.x commands]
         switch(int_value) {
@@ -279,8 +277,8 @@ uint8_t gc_execute_line(char *line)
               word_bit = MODAL_GROUP_M9;
               gc_block.modal.override = OVERRIDE_PARKING_MOTION;
               break;
-          #endif
-          default: FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); // [Unsupported M command]
+          #endif   
+          default: FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); // [Unsupported M command] 
         }
 
         // Check for more than one command per modal group violations in the current block
@@ -296,7 +294,7 @@ uint8_t gc_execute_line(char *line)
            legal g-code words and stores their value. Error-checking is performed later since some
            words (I,J,K,L,P,R) have multiple connotations and/or depend on the issued commands. */
         switch(letter){
-          // case 'A': // Not supported
+          case 'A': word_bit = WORD_A; gc_block.values.a = value; axis_words |= (1<<A_AXIS); break;
           // case 'B': // Not supported
           // case 'C': // Not supported
           // case 'D': // Not supported
@@ -330,7 +328,6 @@ uint8_t gc_execute_line(char *line)
           if (value < 0.0) { FAIL(STATUS_NEGATIVE_VALUE); } // [Word value cannot be negative]
         }
         value_words |= bit(word_bit); // Flag to indicate parameter assigned.
-
     }
   }
   // Parsing complete!
@@ -574,7 +571,6 @@ uint8_t gc_execute_line(char *line)
         }
       }
       break;
-
     default:
 
       // At this point, the rest of the explicit axis commands treat the axis values as the traditional
@@ -832,7 +828,7 @@ uint8_t gc_execute_line(char *line)
   } else {
     bit_false(value_words,(bit(WORD_N)|bit(WORD_F)|bit(WORD_S)|bit(WORD_T))); // Remove single-meaning value words.
   }
-  if (axis_command) { bit_false(value_words,(bit(WORD_X)|bit(WORD_Y)|bit(WORD_Z))); } // Remove axis words.
+  if (axis_command) { bit_false(value_words,(bit(WORD_X)|bit(WORD_Y)|bit(WORD_Z)|bit(WORD_A))); } // Remove axis words.
   if (value_words) { FAIL(STATUS_GCODE_UNUSED_WORDS); } // [Unused words]
 
   /* -------------------------------------------------------------------------------------
@@ -1057,6 +1053,8 @@ uint8_t gc_execute_line(char *line)
       } else if ((gc_state.modal.motion == MOTION_MODE_CW_ARC) || (gc_state.modal.motion == MOTION_MODE_CCW_ARC)) {
         mc_arc(gc_block.values.xyz, pl_data, gc_state.position, gc_block.values.ijk, gc_block.values.r,
             axis_0, axis_1, axis_linear, bit_istrue(gc_parser_flags,GC_PARSER_ARC_IS_CLOCKWISE));
+      } else if (gc_state.modal.motion == MOTION_MODE_AXLE_ROTATE) {
+        rotate_to_angle(gc_block.values.a);
       } else {
         // NOTE: gc_block.values.xyz is returned from mc_probe_cycle with the updated position value. So
         // upon a successful probing cycle, the machine position and the returned value should be the same.
@@ -1065,7 +1063,6 @@ uint8_t gc_execute_line(char *line)
         #endif
         gc_update_pos = mc_probe_cycle(gc_block.values.xyz, pl_data, gc_parser_flags);
       }  
-     
       // As far as the parser is concerned, the position is now == target. In reality the
       // motion control system might still be processing the action and the real tool position
       // in any intermediate location.
